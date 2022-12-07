@@ -1,7 +1,7 @@
 version: '1.0'
 
 steps:
-  unit-tests:
+  unit_tests:
     image: codefresh/buildpacks:nodejs-5
     working-directory : ${{initial-clone}}
     commands:
@@ -10,7 +10,7 @@ steps:
       - gulp test
       - echo $(date)
 
-  build-step:
+  build_step:
     #title: Build My Image #Display name for the step
     type: build
     image-name: containers101/cf-example-result
@@ -19,13 +19,13 @@ steps:
       - OPTION_A=${{OPTION_A}}
       - OPTION_B=${{OPTION_B}}
 
-  push-to-registry:
+  push_to_registry:
     type: push
     #candidate: the image from the build step
     candidate: ${{build-step}}
     tag: ${{CF_BRANCH}}
 
-  integration-tests-step:
+  integration_tests_step:
     type: composition
     #location of the compostion on the filesystem of the cloned image
     composition: './cf-compositions/voting-app-full.yml'
@@ -43,7 +43,7 @@ steps:
       - VOTING_OPTION_A=${{OPTION_A}}
       - VOTING_OPTION_B=${{OPTION_B}}
 
-  launch-composition:
+  launch_composition:
     type: launch-composition
     environment-name: 'Test composition after build'
     composition: './cf-compositions/voting-app-full.yml'
