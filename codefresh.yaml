@@ -1,64 +1,92 @@
-version: '1.0'
-
+version: "1.0"
 steps:
-  # unit_tests:
-  #   image: codefresh/buildpacks:nodejs-5
-  #   # working_directory : ${{initial_clone}}
-  #   commands:
-  #     - echo Installing NPM modules silent
-  #     - npm install
-  #     - gulp test
-  #     - echo $(date)
-
-  build_step:
-    #title: Build My Image #Display name for the step
+  clone:
+    title: "Cloning repository"
+    type: "git-clone"
+    repo: '${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}'
+    revision: '${{CF_REVISION}}'
+  build_app_image:
+    title: Building Docker Image
     type: build
-    image_name: containers101/cf-example-result
-    tag: ${{CF_BRANCH}}
-    build_arguments:
-      - OPTION_A=${{OPTION_A}}
-      - OPTION_B=${{OPTION_B}}
+    stage: build
+    image_name: '${{CF_REPO_NAME}}'
+    working_directory: ./
+    tag: 'multi-stage'
+    dockerfile: Dockerfile
+  deploy_to_k8s:
+    title: Deploy to cluster
+    type: deploy
+    kind: kubernetes
+    cluster: 'eks-spinnaker'
+    namespace: default
+    service: '${{CF_REPO_NAME}}'
+    candidate:
+      image: '${{build_app_image}}'    
 
-  push_to_registry:
-    type: push
-    #candidate: the image from the build step
-    candidate: ${{build-step}}
-    tag: ${{CF_BRANCH}}
 
-  integration_tests_step:
-    type: composition
-    #location of the compostion on the filesystem of the cloned image
-    composition: './cf-compositions/voting-app-full.yml'
-    #run integration only when pushing to master
-    when:
-      branch:
-        only:
-          - master #can also be regex
-    composition_candidates:
-    #this will be the image that we will test
-      integ-test:
-        image: containers101/cf-example-tests:master
-        command: ./tests.sh
-    composition_variables:
-      - VOTING_OPTION_A=${{OPTION_A}}
-      - VOTING_OPTION_B=${{OPTION_B}}
+# version: '1.0'
 
-  launch_composition:
-    type: launch-composition
-    environment_name: 'Test composition after build'
-    composition: './cf-compositions/voting-app-full.yml'
-    composition_variables:
-      - VOTING_OPTION_A=${{OPTION_A}}
-      - VOTING_OPTION_B=${{OPTION_B}}
+# steps:
+#   # unit_tests:
+#   #   image: codefresh/buildpacks:nodejs-5
+#   #   # working_directory : ${{initial_clone}}
+#   #   commands:
+#   #     - echo Installing NPM modules silent
+#   #     - npm install
+#   #     - gulp test
+#   #     - echo $(date)
 
-  # deploy to ecs:
-  #   image: codefresh/cf-deploy-ecs
-  #   commands:
-  #     - cfecs-update --image_name containers101/cf-example-result --image-tag ${{CF_BRANCH}} eu-west-1 vote-app result
-  #   environment:
-  #     - AWS_ACCESS_KEY_ID=${{AWS_ACCESS_KEY_ID}}
-  #     - AWS_SECRET_ACCESS_KEY=${{AWS_SECRET_ACCESS_KEY}}
-  #   when:
-  #     condition:
-  #       all:
-  #         pushCommit: 'includes(lower("${{CF_COMMIT_MESSAGE}}"), "[deploy]") == true'
+#   build_step:
+#     #title: Build My Image #Display name for the step
+#     type: build
+#     image_name: containers101/cf-example-result
+#     tag: ${{CF_BRANCH}}
+#     build_arguments:
+#       - OPTION_A=${{OPTION_A}}
+#       - OPTION_B=${{OPTION_B}}
+
+#   push_to_registry:
+#     type: push
+#     #candidate: the image from the build step
+#     candidate: ${{build-step}}
+#     tag: ${{CF_BRANCH}}
+
+#   integration_tests_step:
+#     type: composition
+#     #location of the compostion on the filesystem of the cloned image
+#     composition: './cf-compositions/voting-app-full.yml'
+#     #run integration only when pushing to master
+#     when:
+#       branch:
+#         only:
+#           - master #can also be regex
+#     composition_candidates:
+#     #this will be the image that we will test
+#       integ-test:
+#         image: containers101/cf-example-tests:master
+#         command: ./tests.sh
+#     composition_variables:
+#       - VOTING_OPTION_A=${{OPTION_A}}
+#       - VOTING_OPTION_B=${{OPTION_B}}
+
+#   launch_composition:
+#     type: launch-composition
+#     environment_name: 'Test composition after build'
+#     composition: './cf-compositions/voting-app-full.yml'
+#     composition_variables:
+#       - VOTING_OPTION_A=${{OPTION_A}}
+#       - VOTING_OPTION_B=${{OPTION_B}}
+
+#   # deploy to ecs:
+#   #   image: codefresh/cf-deploy-ecs
+#   #   commands:
+#   #     - cfecs-update --image_name containers101/cf-example-result --image-tag ${{CF_BRANCH}} eu-west-1 vote-app result
+#   #   environment:
+#   #     - AWS_ACCESS_KEY_ID=${{AWS_ACCESS_KEY_ID}}
+#   #     - AWS_SECRET_ACCESS_KEY=${{AWS_SECRET_ACCESS_KEY}}
+#   #   when:
+#   #     condition:
+#   #       all:
+#   #         pushCommit: 'includes(lower("${{CF_COMMIT_MESSAGE}}"), "[deploy]") == true'
+
+
