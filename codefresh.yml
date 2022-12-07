@@ -1,8 +1,6 @@
 version: '1.0'
 
 steps:
-
-
   unit-tests:
     image: codefresh/buildpacks:nodejs-5
     working-directory : ${{initial-clone}}
@@ -26,8 +24,6 @@ steps:
     #candidate: the image from the build step
     candidate: ${{build-step}}
     tag: ${{CF_BRANCH}}
-
-
 
   integration-tests-step:
     type: composition
@@ -55,14 +51,14 @@ steps:
       - VOTING_OPTION_A=${{OPTION_A}}
       - VOTING_OPTION_B=${{OPTION_B}}
 
-  deploy to ecs:
-    image: codefresh/cf-deploy-ecs
-    commands:
-      - cfecs-update --image-name containers101/cf-example-result --image-tag ${{CF_BRANCH}} eu-west-1 vote-app result
-    environment:
-      - AWS_ACCESS_KEY_ID=${{AWS_ACCESS_KEY_ID}}
-      - AWS_SECRET_ACCESS_KEY=${{AWS_SECRET_ACCESS_KEY}}
-    when:
-      condition:
-        all:
-          pushCommit: 'includes(lower("${{CF_COMMIT_MESSAGE}}"), "[deploy]") == true'
+  # deploy to ecs:
+  #   image: codefresh/cf-deploy-ecs
+  #   commands:
+  #     - cfecs-update --image-name containers101/cf-example-result --image-tag ${{CF_BRANCH}} eu-west-1 vote-app result
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=${{AWS_ACCESS_KEY_ID}}
+  #     - AWS_SECRET_ACCESS_KEY=${{AWS_SECRET_ACCESS_KEY}}
+  #   when:
+  #     condition:
+  #       all:
+  #         pushCommit: 'includes(lower("${{CF_COMMIT_MESSAGE}}"), "[deploy]") == true'
