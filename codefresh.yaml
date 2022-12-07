@@ -3,7 +3,7 @@ version: '1.0'
 steps:
   unit_tests:
     image: codefresh/buildpacks:nodejs-5
-    working-directory : ${{initial-clone}}
+    working_directory : ${{initial-clone}}
     commands:
       - echo Installing NPM modules silent
       - npm install
@@ -13,7 +13,7 @@ steps:
   build_step:
     #title: Build My Image #Display name for the step
     type: build
-    image-name: containers101/cf-example-result
+    image_name: containers101/cf-example-result
     tag: ${{CF_BRANCH}}
     build_arguments:
       - OPTION_A=${{OPTION_A}}
@@ -34,27 +34,27 @@ steps:
       branch:
         only:
           - master #can also be regex
-    composition-candidates:
+    composition_candidates:
     #this will be the image that we will test
       integ-test:
         image: containers101/cf-example-tests:master
         command: ./tests.sh
-    composition-variables:
+    composition_variables:
       - VOTING_OPTION_A=${{OPTION_A}}
       - VOTING_OPTION_B=${{OPTION_B}}
 
   launch_composition:
     type: launch-composition
-    environment-name: 'Test composition after build'
+    environment_name: 'Test composition after build'
     composition: './cf-compositions/voting-app-full.yml'
-    composition-variables:
+    composition_variables:
       - VOTING_OPTION_A=${{OPTION_A}}
       - VOTING_OPTION_B=${{OPTION_B}}
 
   # deploy to ecs:
   #   image: codefresh/cf-deploy-ecs
   #   commands:
-  #     - cfecs-update --image-name containers101/cf-example-result --image-tag ${{CF_BRANCH}} eu-west-1 vote-app result
+  #     - cfecs-update --image_name containers101/cf-example-result --image-tag ${{CF_BRANCH}} eu-west-1 vote-app result
   #   environment:
   #     - AWS_ACCESS_KEY_ID=${{AWS_ACCESS_KEY_ID}}
   #     - AWS_SECRET_ACCESS_KEY=${{AWS_SECRET_ACCESS_KEY}}
